@@ -11,6 +11,7 @@ export default function Mono() {
     const [cryptState, setCryptState] = useState(false)
     const [mapping, setMapping] = useState(() => generateCipherMapping());
     const [fileContent, setFileContent] = useState("")
+    const [originalText, setOriginal] = useState("")
 
     function redirect() {
         setData(prevData => ({
@@ -50,6 +51,7 @@ export default function Mono() {
               confirmButtonText: 'Continue',
             });
           } else {
+            setOriginal(data.Message || fileContent)
             const ciphertext = encryptAlgorithm(data.Message || fileContent, mapping);
             setData((prevData) => ({
               ...prevData,
@@ -115,8 +117,104 @@ export default function Mono() {
     }
 
     function handleCryptAnalyse() {
-
+      if(!originalText) {
+        if (data.Message || fileContent) {
+          const cryptedText = (data.Message || fileContent).toUpperCase();
+      
+          const letterFrequencies = {};
+          for (let i = 0; i < cryptedText.length; i++) {
+            const letter = cryptedText[i];
+            if (letter.match(/[A-Z]/)) {
+              letterFrequencies[letter] = (letterFrequencies[letter] || 0) + 1;
+            }
+          }
+      
+          const englishFrequencies = {
+            'E': 12000,
+            'F': 2500,
+            'T': 9000,
+            'W': 2000,
+            'Y': 2000,
+            'A': 8000,
+            'I': 8000,
+            'N': 8000,
+            'O': 8000,
+            'S': 8000,
+            'G': 1700,
+            'P': 1700,
+            'H': 6400,
+            'B': 1600,
+            'R': 6200,
+            'V': 1200,
+            'D': 4400,
+            'K': 800,
+            'L': 4000,
+            'Q': 500,
+            'U': 3400,
+            'J': 400,
+            'X': 400,
+            'C': 3000,
+            'M': 3000,
+            'Z': 200
+          };
+      
+          let totalLetters = 0;
+          for (const letter in letterFrequencies) {
+            totalLetters += letterFrequencies[letter];
+          }
+      
+          const decryptionMap = {};
+          for (const letter in letterFrequencies) {
+            const observedFrequency = (letterFrequencies[letter] / totalLetters) * 100;
+            let closestMatch = '';
+            let closestDifference = Number.MAX_VALUE;
+      
+            for (const englishLetter in englishFrequencies) {
+              const englishFrequency = englishFrequencies[englishLetter];
+              const difference = Math.abs(englishFrequency - observedFrequency);
+      
+              if (difference < closestDifference) {
+                closestDifference = difference;
+                closestMatch = englishLetter;
+              }
+            }
+      
+            decryptionMap[letter] = closestMatch;
+          }
+      
+          let decryptedText = '';
+          for (let i = 0; i < cryptedText.length; i++) {
+            const letter = cryptedText[i];
+            if (letter.match(/[A-Z]/)) {
+              decryptedText += decryptionMap[letter] || letter;
+            } else {
+              decryptedText += letter;
+            }
+          }
+      
+          setData((prevData) => ({
+            ...prevData,
+            Message: decryptedText,
+          }));
+          setCryptState((prevState) => !prevState);
+        }
+      }else {
+        const mappingString = JSON.stringify(mapping, null, 2);
+        Swal.fire(
+          `Message Decrypted`,
+          `Mapping:\n${mappingString}`,
+          'success'
+        )
+        setData(prevData => {
+          return {
+            ...prevData,
+            Message : originalText
+          }
+        })
+      }
     }
+    
+    
 
     
   return (
