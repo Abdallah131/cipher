@@ -10,6 +10,7 @@ export default function Mono() {
     const [analyse, setAnalyse] = useState(true)
     const [cryptState, setCryptState] = useState(false)
     const [mapping, setMapping] = useState(() => generateCipherMapping());
+    const [fileContent, setFileContent] = useState("")
 
     function redirect() {
         setData(prevData => ({
@@ -18,19 +19,30 @@ export default function Mono() {
         }));
         setAnalyse(prevAnalyse => !prevAnalyse);
     }
+
     function handleChange(e) {
-        const { value, name } = e.target;
-    
-        setData(prevData => {
-            return {
-                ...prevData,
-                [name]: value
-            }
-        });
-    }
+      const { name,value } = e.target;
+      if (name === "textfile") {
+          const file = e.target.files[0];
+          if (file) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                  const fileContent = e.target.result;
+                  setFileContent(fileContent);
+              };
+              reader.readAsText(file);
+          }
+      } else {
+          setData(prevData => ({
+              ...prevData,
+              [name]: value
+          }));
+      }
+  }
+
     function handleCrypt() {
         if (cryptState === false) {
-          if (!data.Message) {
+          if(data.Message === "" && fileContent === "") {
             Swal.fire({
               title: 'Error!',
               text: 'Empty Message',
@@ -38,7 +50,7 @@ export default function Mono() {
               confirmButtonText: 'Continue',
             });
           } else {
-            const ciphertext = encryptAlgorithm(data.Message, mapping);
+            const ciphertext = encryptAlgorithm(data.Message || fileContent, mapping);
             setData((prevData) => ({
               ...prevData,
               Message: ciphertext,
@@ -46,7 +58,7 @@ export default function Mono() {
             setCryptState((prevState) => !prevState);
           }
         } else {
-          const decrypted = decrpytAlgorithm(data.Message, mapping);
+          const decrypted = decrpytAlgorithm(data.Message || fileContent, mapping);
           setData((prevData) => ({
             ...prevData,
             Message: decrypted,
@@ -119,7 +131,7 @@ export default function Mono() {
             <textarea
                 placeholder='Message'
                 onChange={handleChange}
-                value={data.Message}
+                value={data.Message || fileContent}
                 name = "Message"
             /><br/><br/>
             <input 

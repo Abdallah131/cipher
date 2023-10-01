@@ -10,22 +10,33 @@ export default function Caesar() {
     })
     const [cryptState, setCryptState] = useState(false)
     const [analyse, setAnalyse] = useState(true)
-
-    function handleChange(e) {
-        const { value, name } = e.target;
-        const newValue = name === "shiftValue" ? parseInt(value, 10) : value;
+    const [fileContent, setFileContent] = useState("")
     
-        setData(prevData => {
-            return {
-                ...prevData,
-                [name]: newValue
-            }
-        });
-    }
+    function handleChange(e) {
+      const { value, name } = e.target;
+      const newValue = name === "shiftValue" ? parseInt(value, 10) : value;
+
+      if (name === "textfile") {
+          const file = e.target.files[0];
+          if (file) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                  const fileContent = e.target.result;
+                  setFileContent(fileContent);
+              };
+              reader.readAsText(file);
+          }
+      } else {
+          setData(prevData => ({
+              ...prevData,
+              [name]: newValue
+          }));
+      }
+  }
     
     function handleCrypt() {
        if(cryptState === false ) {
-        if(data.Message === "") {
+        if(data.Message === "" && fileContent === "") {
           Swal.fire({
             title: 'Error!',
             text: 'Empty Message',
@@ -41,7 +52,7 @@ export default function Caesar() {
                 })
             }
            }else {
-            const encryptedText = cesarAlgo(data.Message, data.shiftValue);
+            const encryptedText = cesarAlgo(data.Message || fileContent, data.shiftValue);
             setData(prevData => {
                 return {
                     ...prevData,
@@ -51,7 +62,7 @@ export default function Caesar() {
             setCryptState(prevState => !prevState)
            }
        }else {
-        if(data.Message === "") {
+        if(data.Message === "" && fileContent === "") {
             Swal.fire({
                 title: 'Error!',
                 text: 'Empty Message',
@@ -59,7 +70,7 @@ export default function Caesar() {
                 confirmButtonText: 'Continue'
             })
            }else {
-                const decryptedText = cesarAlgo(data.Message, -data.shiftValue);
+                const decryptedText = cesarAlgo(data.Message || fileContent, -data.shiftValue);
                 setData(prevData => {
                     return {
                         ...prevData,
@@ -181,7 +192,7 @@ export default function Caesar() {
             <textarea
                 placeholder='Message'
                 onChange={handleChange}
-                value={data.Message}
+                value={data.Message || fileContent}
                 name = "Message"
             /><br/><br/>
             <input 
