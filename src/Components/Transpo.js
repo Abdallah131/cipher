@@ -5,13 +5,14 @@ import Swal from 'sweetalert2'
 
 export default function Mono() {
     const [data , setData] = useState({
-        Message : ""
+        Message : "",
+        Key : null
     })
     const [analyse, setAnalyse] = useState(true)
     const [cryptState, setCryptState] = useState(false)
-    const [mapping, setMapping] = useState(() => generateCipherMapping());
     const [fileContent, setFileContent] = useState("")
-    const [originalText, setOriginal] = useState("")
+    const [genkey, setKey] = useState(null);
+
 
     function redirect() {
         setData(prevData => ({
@@ -51,16 +52,16 @@ export default function Mono() {
               confirmButtonText: 'Continue',
             });
           } else {
-            setOriginal(data.Message || fileContent)
-            const ciphertext = encryptAlgorithm(data.Message || fileContent, mapping);
+            const encrypted = TranspoEncrypt(data.Message || fileContent, data.Key);
+            setKey(data.Key)
             setData((prevData) => ({
               ...prevData,
-              Message: ciphertext,
+              Message: encrypted,
             }));
             setCryptState((prevState) => !prevState);
           }
         } else {
-          const decrypted = decrpytAlgorithm(data.Message || fileContent, mapping);
+          const decrypted = TranspoDecrypt(data.Message || fileContent, data.Key);
           setData((prevData) => ({
             ...prevData,
             Message: decrypted,
@@ -69,163 +70,139 @@ export default function Mono() {
         }
       }
 
-    function generateCipherMapping() {
-        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const shuffledAlphabet = [...alphabet].sort(() => Math.random() - 0.5);
-        
-        const mapping = {};
-        for (let i = 0; i < alphabet.length; i++) {
-            const letter = alphabet[i];
-            const cipherSymbol = shuffledAlphabet[i];
-            if (!mapping[letter]) {
-            mapping[letter] = [];
-            }
-            mapping[letter].push(cipherSymbol);
+      function TranspoEncrypt(plaintext, key) {
+        let ciphertext = "";
+        const numRows = Math.ceil(plaintext.length / key);
+        const matrix = new Array(numRows);
+    
+        for (let i = 0; i < numRows; i++) {
+            matrix[i] = new Array(key);
         }
-        return mapping;
-    }
-        function encryptAlgorithm(plaintext, mapping) {
-        plaintext = plaintext.toUpperCase();
-        let ciphertext = '';
-
-        for (let i = 0; i < plaintext.length; i++) {
-            const letter = plaintext[i];
-            if (mapping[letter]) {
-            ciphertext += mapping[letter][0];
-            } else {
-            ciphertext += letter;
+    
+        let charIndex = 0;
+    
+        for (let col = 0; col < key; col++) {
+            for (let row = 0; row < numRows; row++) {
+                if (charIndex < plaintext.length) {
+                    matrix[row][col] = plaintext[charIndex];
+                    charIndex++;
+                }
             }
         }
+    
+        for (let row = 0; row < numRows; row++) {
+            for (let col = 0; col < key; col++) {
+                if (matrix[row][col] !== undefined) {
+                    ciphertext += matrix[row][col];
+                }
+            }
+        }
+    
         return ciphertext;
     }
 
-        function decrpytAlgorithm(ciphertext, mapping) {
-        let plaintext = '';
+      function TranspoDecrypt(ciphertext, key) {
+        let plaintext = "";
+        const numRows = Math.ceil(ciphertext.length / key);
+        const matrix = new Array(numRows);
 
-        for (let i = 0; i < ciphertext.length; i++) {
-            const cryptedLetter = ciphertext[i];
-            const letters = Object.keys(mapping).filter(letter => mapping[letter].includes(cryptedLetter));
+        for (let i = 0; i < numRows; i++) {
+            matrix[i] = new Array(key);
+        }
 
-            if (letters.length > 0) {
-            plaintext += letters[0];
-            } else {
-            plaintext += cryptedLetter;
+        let charIndex = 0;
+
+        for (let row = 0; row < numRows; row++) {
+            for (let col = 0; col < key; col++) {
+                if (charIndex < ciphertext.length) {
+                    matrix[row][col] = ciphertext[charIndex];
+                    charIndex++;
+                }
+            }
+        }
+
+        for (let col = 0; col < key; col++) {
+            for (let row = 0; row < numRows; row++) {
+                if (matrix[row][col] !== undefined) {
+                    plaintext += matrix[row][col];
+                }
             }
         }
 
         return plaintext;
+}
+  
+  function handleCryptAnalyse() {
+    const attempts = cryptanalyse(data.Message)
+    console.log(attempts)
+  }
+  function cryptanalyse(cryptedtext) {
+    if (cryptedtext === "") {
+        Swal.fire({
+            title: 'Error!',
+            text: 'Empty Message',
+            icon: 'error',
+            confirmButtonText: 'Continue',
+        });
+        return;
     }
 
-    function handleCryptAnalyse() {
-      if(!originalText) {
-        if (data.Message || fileContent) {
-          const cryptedText = (data.Message || fileContent).toUpperCase();
-      
-          const letterFrequencies = {};
-          for (let i = 0; i < cryptedText.length; i++) {
-            const letter = cryptedText[i];
-            if (letter.match(/[A-Z]/)) {
-              letterFrequencies[letter] = (letterFrequencies[letter] || 0) + 1;
-            }
-          }
-      
-          const englishFrequencies = {
-            'E': 12000,
-            'F': 2500,
-            'T': 9000,
-            'W': 2000,
-            'Y': 2000,
-            'A': 8000,
-            'I': 8000,
-            'N': 8000,
-            'O': 8000,
-            'S': 8000,
-            'G': 1700,
-            'P': 1700,
-            'H': 6400,
-            'B': 1600,
-            'R': 6200,
-            'V': 1200,
-            'D': 4400,
-            'K': 800,
-            'L': 4000,
-            'Q': 500,
-            'U': 3400,
-            'J': 400,
-            'X': 400,
-            'C': 3000,
-            'M': 3000,
-            'Z': 200
-          };
-      
-          let totalLetters = 0;
-          for (const letter in letterFrequencies) {
-            totalLetters += letterFrequencies[letter];
-          }
-      
-          const decryptionMap = {};
-          for (const letter in letterFrequencies) {
-            const observedFrequency = (letterFrequencies[letter] / totalLetters) * 100;
-            let closestMatch = '';
-            let closestDifference = Number.MAX_VALUE;
-      
-            for (const englishLetter in englishFrequencies) {
-              const englishFrequency = englishFrequencies[englishLetter];
-              const difference = Math.abs(englishFrequency - observedFrequency);
-      
-              if (difference < closestDifference) {
-                closestDifference = difference;
-                closestMatch = englishLetter;
-              }
-            }
-      
-            decryptionMap[letter] = closestMatch;
-          }
-      
-          let decryptedText = '';
-          for (let i = 0; i < cryptedText.length; i++) {
-            const letter = cryptedText[i];
-            if (letter.match(/[A-Z]/)) {
-              decryptedText += decryptionMap[letter] || letter;
-            } else {
-              decryptedText += letter;
-            }
-          }
-      
-          setData((prevData) => ({
-            ...prevData,
-            Message: decryptedText,
-          }));
-          setCryptState((prevState) => !prevState);
+    const ciphertext = cryptedtext;
+    let potentialMessages = [];
+
+    for (let key = 2; key <= 20; key++) {
+        const potentialDecryption = TranspoDecrypt(ciphertext, key);
+
+        console.log(`Key : ${key}: Message : ${potentialDecryption}`);
+        console.log(genkey)
+        if(genkey == key) {
+          Swal.fire(
+            `Message Decrypted : ${potentialDecryption} `,
+            `Key Value : ${key}`,
+            'success'
+          );
         }
-      }else {
-        const mappingString = JSON.stringify(mapping, null, 2);
-        Swal.fire(
-          `Message Decrypted`,
-          `Mapping:\n${mappingString}`,
-          'success'
-        )
-        setData(prevData => {
-          return {
-            ...prevData,
-            Message : originalText
-          }
-        })
-      }
+        potentialMessages.push({
+            key,
+            message: potentialDecryption,
+        });
     }
-    
-    
+  }
 
+  async function isEnglishWord(word) {
+    try {
+      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+      const data = await response.json();
+  
+      if (Array.isArray(data) && data.length > 0) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      return false;
+    }
+  }
+    
     
   return (
     <div className='Main'>
         <div className='Container'>
             <br/>
             <div className="Header">
-            <h1 style={{marginLeft:"130px"}}>MonoAlphabétique</h1>
-            <img src={arrow} onClick={redirect} style={{marginLeft:"70px"}}/>
+            <h1 style={{marginLeft:"130px"}}>Transpoistion Cipher</h1>
+            <img src={arrow} onClick={redirect} style={{marginLeft:"50px"}}/>
             </div>
-            <br/><br/><br/><br/>
+            <input
+                    style={{ marginTop: "40px" }}
+                    type='number'
+                    placeholder='Key'
+                    required
+                    onChange={handleChange}
+                    value={data.Key}
+                    name="Key"
+                    disabled={cryptState}
+                /><br /><br />
             <textarea
                 placeholder='Message'
                 onChange={handleChange}

@@ -217,7 +217,6 @@ export default function Vigenere() {
       combinations.push(current);
       return;
     }
-  
     for (const char of possibleChars) {
       generateCombinationsRecursive(current + char, possibleChars, length, combinations);
     }
