@@ -128,11 +128,12 @@ export default function Vigenere() {
     text = text.toUpperCase();
     key = key.toUpperCase();
     let encryptedText = "";
-  
+
+    // Iterate through the characters of the encrypted text and determine the key character for each position in the message.
     for (let i = 0; i < text.length; i++) {
       const textChar = text[i];
       const keyChar = key[i % key.length];
-  
+    // Encrypt the character in the plaintext using the Vigenère square and the corresponding key character.
       if (VIGNERE_SQUARE[textChar]) {
         const rowIndex = VIGNERE_SQUARE.A.indexOf(keyChar);
         const encryptedChar = VIGNERE_SQUARE[textChar][rowIndex];
@@ -149,7 +150,8 @@ export default function Vigenere() {
     encryptedText = encryptedText.toUpperCase();
     key = key.toUpperCase();
     let decryptedText = "";
-  
+
+  // Iterate through the characters of the encrypted text and determine the key character for each position in the message.
     for (let i = 0; i < encryptedText.length; i++) {
       const encryptedChar = encryptedText[i];
       const keyChar = key[i % key.length];
@@ -160,6 +162,8 @@ export default function Vigenere() {
         continue;
       }
   
+
+      // Use the Vigenère square to decrypt the character in the encrypted text using the corresponding key character.
       const rowIndex = VIGNERE_SQUARE.A.indexOf(keyChar);
       if (rowIndex !== -1) {
         for (const letter in VIGNERE_SQUARE) {
@@ -186,6 +190,7 @@ export default function Vigenere() {
       if (keyFound) {
         break;
       }
+      // Generate the key combinations using the recursive functions and decrypt
       const keyCombinations = generateKeyCombinations(possibleKeyChars, keyLength);
       for (const key of keyCombinations) {
         const decryptedText = vigenereAlgoDecrypt(encryptedText, key);

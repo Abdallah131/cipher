@@ -72,15 +72,18 @@ export default function Mono() {
 
       function TranspoEncrypt(plaintext, key) {
         let ciphertext = "";
+        // get back the number of rows to split the text into by diving text length on actual key
         const numRows = Math.ceil(plaintext.length / key);
+        // create an array based on the numrows
         const matrix = new Array(numRows);
     
         for (let i = 0; i < numRows; i++) {
+          // if the length of the text is < numrows you insert in a new array
             matrix[i] = new Array(key);
         }
-    
         let charIndex = 0;
-    
+
+    // Populate the matrix with characters from the plaintext in a transposed manner.
         for (let col = 0; col < key; col++) {
             for (let row = 0; row < numRows; row++) {
                 if (charIndex < plaintext.length) {
@@ -89,7 +92,8 @@ export default function Mono() {
                 }
             }
         }
-    
+
+    // Read characters from the matrix row by row
         for (let row = 0; row < numRows; row++) {
             for (let col = 0; col < key; col++) {
                 if (matrix[row][col] !== undefined) {
@@ -97,7 +101,6 @@ export default function Mono() {
                 }
             }
         }
-    
         return ciphertext;
     }
 
@@ -109,9 +112,9 @@ export default function Mono() {
         for (let i = 0; i < numRows; i++) {
             matrix[i] = new Array(key);
         }
-
         let charIndex = 0;
 
+      // Reconstruct the matrix from the ciphertext by filling it with characters in the order they were encrypted.
         for (let row = 0; row < numRows; row++) {
             for (let col = 0; col < key; col++) {
                 if (charIndex < ciphertext.length) {
@@ -120,15 +123,14 @@ export default function Mono() {
                 }
             }
         }
-
-        for (let col = 0; col < key; col++) {
+    // Read characters from the matrix row by row
+    for (let col = 0; col < key; col++) {
             for (let row = 0; row < numRows; row++) {
                 if (matrix[row][col] !== undefined) {
                     plaintext += matrix[row][col];
                 }
             }
         }
-
         return plaintext;
 }
   
@@ -146,13 +148,11 @@ export default function Mono() {
         });
         return;
     }
-
     const ciphertext = cryptedtext;
     let potentialMessages = [];
 
     for (let key = 2; key <= 20; key++) {
         const potentialDecryption = TranspoDecrypt(ciphertext, key);
-
         console.log(`Key : ${key}: Message : ${potentialDecryption}`);
         console.log(genkey)
         if(genkey == key) {
@@ -168,7 +168,6 @@ export default function Mono() {
         });
     }
   }
-
   async function isEnglishWord(word) {
     try {
       const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
@@ -184,7 +183,7 @@ export default function Mono() {
     }
   }
     
-    
+  
   return (
     <div className='Main'>
         <div className='Container'>
