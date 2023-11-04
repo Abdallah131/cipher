@@ -183,7 +183,8 @@ export default function Vigenere() {
   
   function cryptanalyse(encryptedText) {
     const possibleKeyChars = 'abcdefghijklmnopqrstuvwxyz';
-  
+    const att = countLetterCombinations(encryptedText)
+    console.log(att)
     let keyFound = false;
   
     for (let keyLength = 1; keyLength <= 10; keyLength++) {
@@ -227,8 +228,50 @@ export default function Vigenere() {
     }
   }
   
+  function countLetterCombinations(text) {
+    const letterCombinations = {}; // Use an object to store unique combinations
+    let mostFrequentCombination = '';
+    let maxCount = 0;
+    let mostFrequentCombinationLength = 0;
   
-
+    // Regular expression to match letter combinations of length 2-3
+    const regex = /\b\w{2,3}\b/g;
+  
+    const matches = text.match(regex);
+  
+    if (matches) {
+      matches.forEach(match => {
+        const length = match.length;
+        // Increment the count for each unique combination
+        letterCombinations[match] = (letterCombinations[match] || 0) + 1;
+        if (letterCombinations[match] > maxCount) {
+          mostFrequentCombination = match;
+          maxCount = letterCombinations[match];
+          mostFrequentCombinationLength = length;
+        }
+      });
+    }
+  
+    // Filter out combinations that appear only once
+    const filteredCombinations = {};
+    for (const combination in letterCombinations) {
+      if (letterCombinations[combination] > 1) {
+        filteredCombinations[combination] = letterCombinations[combination];
+      }
+    }
+  
+    // Format the output as "Facteur: résultat"
+    const formattedOutput = {};
+    for (const combination in filteredCombinations) {
+      formattedOutput[`Facteur: ${combination}`] = filteredCombinations[combination];
+    }
+  
+    return {
+      mostFrequentCombinationLength: mostFrequentCombinationLength,
+      combinations: formattedOutput
+    };
+  }
+  
     async function isEnglishWord(word) {
       try {
         const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
