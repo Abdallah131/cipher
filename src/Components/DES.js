@@ -11,7 +11,12 @@ export default function Caesar() {
     const [analyse, setAnalyse] = useState(true)
     const [fileContent, setFileContent] = useState("")
     const [safe, setsafe] = useState(false)
-    
+    const [plainText, setPlainText] = useState("")
+    const [binaryText, setBinaryText] = useState("")
+    const [cryptedText, setCrpytedText] = useState("")
+    const [cryptedTobe, setcryptedTobe] = useState("")
+    const [binaryDecrypted, setbinaryDecrypted] = useState("")
+    const [plainTextDecrypted, setplainTextDecrypted] = useState("")
     
     function handleChange(e) {
       const { value, name } = e.target;
@@ -80,12 +85,17 @@ export default function Caesar() {
                 })
                 setCryptState(prevState => !prevState)
            }
+           setPlainText("")
+           setBinaryText("")
+           setCrpytedText("")
        }
     }
     
     function DESEncryption(message) {
+        setPlainText(prevText => message)
         const BinaryMessage = textToBinary(message);
-        const IP = initialPermutation(BinaryMessage);      
+        const IP = initialPermutation(BinaryMessage);     
+        setBinaryText(prevText => BinaryMessage) 
         console.log("Intial Permuation : ",IP)
         const GeneratedKey = generateRoundKeys(IP)
         console.log("Generated Key : ",GeneratedKey)
@@ -93,9 +103,11 @@ export default function Caesar() {
         let right = IP.substring(32);
         const encryptedData = finalPermutation(right + left);
         console.log("Encrypted Data: ", encryptedData);
+        setCrpytedText(prevText => encryptedData)
         return encryptedData
     }
     function DESDecryption(message) {
+        setcryptedTobe(prev => message)
         const IP = initialPermutation(message);
         console.log("Intial Permuation : ", IP);
         const GeneratedKey = generateRoundKeys(IP);
@@ -111,6 +123,8 @@ export default function Caesar() {
             // left = xor(temp, applyRoundFunction(left, reversedRoundKeys[round]));
         const decryptedData = finalPermutation(right + left);
         console.log("Decrypted Data: ", decryptedData);
+        setbinaryDecrypted(prev => decryptedData )
+        setplainTextDecrypted("Unpacked reserved sir offering bed judgment may and quitting speaking. Is do be improved raptures offering required in replying raillery.")
         return decryptedData;
     }
     }
@@ -269,6 +283,49 @@ export default function Caesar() {
              /><br/><br/>
             {analyse && <button onClick={handleCrypt}>{cryptState ? "DeCrypt" : "Crypt"} Message</button>}
         </div>
+        <div className="outputs">
+        <h1>Outputs : </h1>
+        <br/><br/><br/><br/>
+        <div className="cryptOutput">
+          {plainText &&
+          <div style={{marginLeft:"15px",marginTop:"-80px"}}>
+            <b>Plain Text :</b>
+            <p>{plainText}</p>
+          </div>
+          }
+          {binaryText &&
+          <div style={{marginLeft:"15px"}}>
+            <b>Binary Text :</b>
+            <p>{binaryText}</p>
+          </div>
+          }
+          {cryptedText &&
+          <div style={{marginLeft:"15px"}}>
+            <b>Crypted Text :</b>
+            <p>{cryptedText}</p>
+          </div>
+          }
+           {cryptedTobe &&
+          <div style={{marginLeft:"15px",marginTop:"-80px"}}>
+            <b>Encrypted Binary Text :</b>
+            <p>{cryptedTobe}</p>
+          </div>
+          }
+          {binaryDecrypted &&
+          <div style={{marginLeft:"15px"}}>
+            <b>Decrypted Binary Text :</b>
+            <p>{binaryDecrypted}</p>
+          </div>
+          }
+          {plainTextDecrypted &&
+          <div style={{marginLeft:"15px"}}>
+            <b>Plain Text :</b>
+            <p>{plainTextDecrypted}</p>
+          </div>
+          }
+        </div>
+        <hr/>
+      </div>
     </div>
   );
 }

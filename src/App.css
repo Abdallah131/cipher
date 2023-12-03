@@ -93,3 +93,28 @@
 .Container button:hover {
    transform: scale(1.05);
 }
+.outputs{
+    height: 700px;
+    width: 500px;
+    background-color: white;
+    position: absolute;
+    top: 8.5%;
+    left: 7.8%;
+    font-family: Cairo;
+    overflow: hidden;
+}
+.outputs h1 {
+    margin-left: 210px;
+    opacity: 0.9;
+    margin-top: 10px;
+}
+.outputs hr{
+    transform: rotate(90deg);
+    margin-left: 148px;
+    width: 700px;
+    position: absolute;
+    top: 50%;
+}
+.cryptOutput{
+    text-align: center;
+}
