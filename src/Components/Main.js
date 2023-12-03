@@ -1,10 +1,10 @@
 import React from 'react';
-import DES from './DES';
+import AES from './AES';
 
 export default function Main() {
   return (
     <div className='Main'> 
-     <DES />
+     <AES />
     </div>
   );
 }
