@@ -1,10 +1,10 @@
 import React from 'react';
-import Signature from './Signature';
+import Hashing from './Hashing';
 
 export default function Main() {
   return (
     <div className='Main'> 
-     <Signature />
+     <Hashing />
     </div>
   );
 }
