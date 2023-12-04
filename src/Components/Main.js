@@ -1,10 +1,10 @@
 import React from 'react';
-import RSA from './RSA';
+import Signature from './Signature';
 
 export default function Main() {
   return (
     <div className='Main'> 
-     <RSA />
+     <Signature />
     </div>
   );
 }
