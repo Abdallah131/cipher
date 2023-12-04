@@ -1,10 +1,10 @@
 import React from 'react';
-import AES from './AES';
+import RSA from './RSA';
 
 export default function Main() {
   return (
     <div className='Main'> 
-     <AES />
+     <RSA />
     </div>
   );
 }
